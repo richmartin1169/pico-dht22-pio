@@ -1,0 +1,119 @@
+
+
+; PIO program to implement reading of a DHT22 temperature / humidity sensor
+; The program blocks initially, waiting for a value to be pushed to its Tx FIFO.
+; This value is used as the basis for the length of the start pulse.
+; When the bit stream has finished IRQ0 is fired which announces to the parent program
+; that the data collection has ended.
+
+.program dht22pio
+
+.wrap_target
+	pull block 			; Wait for start command. Value passed in is for timing the low start pulse, value is moved into the OSR
+	mov x osr			; Use scratch register x for the timing of the start pulse
+	set pindirs 1		; Set pin as output
+	set pins 0 			; Set pin low
+	
+	; Low Start Pulse
+startLow:
+	jmp x-- startLow 	; Delay to produce the low start pulse
+	set pins 1			; Set pin high for a single clock cycle (3.3uS at 300KHz clock)
+	set pindirs 0 [2]	; Set pin as input, floats high via external pullup, delay for 9.9uS (clock cycle for the command + 2 delay cycles)
+	
+	; Start Acknowledge from the dht22 sensor (low of 80uS followed by a high of 80uS)
+	wait 0 pin 0		; Wait for pin to be driven low ("wait pin" command uses a pin number which is *relative* to IN group)
+	wait 1 pin 0		; Wait for pin to be driven high
+	
+	; Clock in 40 bits
+	; A "0" bit is low for 50uS followed by a high of 26-28uS
+	; A "1" bit is low for 50uS followed by a high of 70uS
+	set y 3				; Outer loop of x4
+data1:
+	set x 9				; Inner loop of x10
+data2:
+	wait 0 pin 0		; Find the low period, the start of a bit
+	wait 1 pin 0 [13]	; Find the rising edge, we're now in the high period of a bit. A delay of [13]=43.3uS at 300KHz pio clock.
+						; If the bit at this point is a "0", this is past the high period (26-28uS) and into the low period of the next bit.
+						; If the bit at this point is a "1", this is still in the high period of this bit.
+	in pins 1			; Measure the pin, copy it into the ISR. Autopush set for 16 bits.
+	jmp x-- data2
+	jmp y-- data1
+	push				; Last byte is checksum, only 8 bits, not 16 bits so no autopush (16 + 16 + 8 bits). Should have 3 entries in the Rx FIFO now
+	irq wait 0			; Asserts IRQ0 to system then waits for the IRQ to be cleared
+.wrap
+
+
+; Design Notes
+; Line 35: Why was a delay of 13 cycles chosen?
+
+; First, why was a PIO clock of 300KHz chosen?
+; The max delay at line 35 could be 50uS to get us past the 28uS high of a bit "0" and roughly midway into the low period of the next bit.
+; To use the PIO delay function, we only have 5 bits, so the number of delay cycles can be a maximum of 31.
+; Let's halve this to make sure we're working in the middle, nominally aiming for a delay of 15 cycles.
+; If 15 cycles = 50uS, then 1 cycle = 3.3333333uS = a PIO clock of 300KHz.
+; CPU is running at 125MHz, so the divider needs to be set at 416.666666
+
+; Any single bit consists of a low period of 50uS followed by a high period that is either 26-28uS (bit "0") or 70uS (bit "1")
+
+;     A_______B                  C________
+;     |       |                  |
+;     |       |                  |
+;     |       |                  |
+;     |       |                  |
+;_____|       |_________X________|
+
+
+; At line 35 we are waiting for a rising edge shown as "A".
+; Depending on whether we are looking at a bit "0" or "1", the high between A-B will last for either 26-28uS or 70uS.
+; Period B-C is the low period of the NEXT bit, all low periods for both bit "0" and bit "1" are 50uS.
+; If the bit is a "0" we need to sample the signal at point "X".
+; From the rising edge at point A, X is 28uS + (50uS/2) = 53uS = 15 cycles
+
+; BUT:
+; At the point of measuring the bit (line 38 and point "X") the longest path back round the two loops is 5 cycles (16.7uS).
+; So the gap between X and C must also allow for this.
+; We'll try to put point "X" midway between the falling edge at "B" and 16.7uS before the rising edge of C.
+; From the edge at "B", point "X" is (50uS - 16.7uS) /2 = 16.7uS
+; From the rising edge at point "A", X is 16.7uS + 28uS = 44.7uS = 13 cycles.
+
+; So using 13 cycles:
+; From edge "A" to "X" we have: 13*3.3uS = 43.3uS
+; From edge "B" to "X" we have: 43.3uS - 28uS = 15.3uS
+; From "X" to edge "C" we have: 50uS - 15.3 = 34.7uS
+; From edge "X" to 16.7uS before "C" we have: 34.7uS - 16.7uS = 18uS
+
+; If the bit is a "0", following sampling at line 35, we go back round the loop(s) and wait for a low, which we already have. Next is wait for a high.
+
+; If the bit is a "1" the sample point at "X" is 43.3uS, but the high period is 70uS. Therefore this will be sampled a a high. We go back round the loop(s)
+; and wait for a low. In this case we are still high (43.3uS + 16.7uS max loop path = 60uS)
+
+
+% c-sdk {
+	static inline void dht22pio_program_init(PIO pio, uint sm, uint offset, uint pin) {
+		pio_sm_config c=dht22pio_program_get_default_config(offset);
+		
+		// Set pin as available to both IN and SET groups
+		sm_config_set_set_pins(&c, pin, 1);
+		sm_config_set_in_pins(&c, pin);
+		
+		// Set fill order and push every 16 bits
+		sm_config_set_in_shift(&c, false, true, 16);
+		
+		// Set pin as controlled by PIO block
+		pio_gpio_init(pio, pin);
+		
+		// Set initial direction of pin to input
+		pio_sm_set_consecutive_pindirs(pio, sm, pin, 0, true);
+		
+		// Set PIO clock to 300KHz (sysclk=125MHz)
+		sm_config_set_clkdiv(&c, 416.666667);
+		
+		// Set up IRQ0
+		pio_set_irq0_source_enabled(pio, pis_interrupt0, true); // true to make irq go to system. Not just within pio sm block
+		pio_interrupt_clear(pio, 0);
+		
+		// Init pio sm
+		pio_sm_init(pio, sm, offset, &c);
+		pio_sm_set_enabled(pio, sm, true);
+	}
+%}
