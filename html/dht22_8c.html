@@ -114,7 +114,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:a14dc7a482177e1a2d939eb914988c5ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starts the data collection.  <a href="dht22_8c.html#a14dc7a482177e1a2d939eb914988c5ee">More...</a><br /></td></tr>
 <tr class="separator:a14dc7a482177e1a2d939eb914988c5ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a026da520a997a509f597cf932836f322"><td class="memItemLeft" align="right" valign="top"><a class="el" href="dht22_8h.html#a668de3a8324bd4504764d49978975d8e">dht22data_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dht22_8c.html#a026da520a997a509f597cf932836f322">dht22_get_data_blocking</a> (bool reset_on_failure)</td></tr>
-<tr class="memdesc:a026da520a997a509f597cf932836f322"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collect measureed sensor data.  <a href="dht22_8c.html#a026da520a997a509f597cf932836f322">More...</a><br /></td></tr>
+<tr class="memdesc:a026da520a997a509f597cf932836f322"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collect measured sensor data.  <a href="dht22_8c.html#a026da520a997a509f597cf932836f322">More...</a><br /></td></tr>
 <tr class="separator:a026da520a997a509f597cf932836f322"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e7502d670a2c7f921c8fb214de5e858"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dht22_8c.html#a7e7502d670a2c7f921c8fb214de5e858">dht22_reset</a> ()</td></tr>
 <tr class="memdesc:a7e7502d670a2c7f921c8fb214de5e858"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets and restarts the PIO state machine.  <a href="dht22_8c.html#a7e7502d670a2c7f921c8fb214de5e858">More...</a><br /></td></tr>
@@ -176,7 +176,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Collect measureed sensor data. </p>
+<p>Collect measured sensor data. </p>
 <p>Once dht22_start has been called, this function can be called immediately after or some time later. If the data collection has not yet finished, this function will block until it is finished, then return the data</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -243,7 +243,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Resets and restarts the PIO state machine. </p>
-<p>Occasionally data from the sensor may be malformed, interrupted or lost. This can reult in a PIO program that is locked waiting for edges or pulses that will never arrive. This function allows a complete reset and restart of the PIO state machine to allow it to be used again. dht22_init is not required to be called again, only <a class="el" href="dht22_8h.html#a77222a1c2b89ee80dd21e852350daee6" title="Starts the data collection.">dht22_start()</a> and <a class="el" href="dht22_8h.html#a026da520a997a509f597cf932836f322" title="Collect measureed sensor data.">dht22_get_data_blocking()</a>. </p>
+<p>Occasionally data from the sensor may be malformed, interrupted or lost. This can result in a PIO program that is locked waiting for edges or pulses that will never arrive. This function allows a complete reset and restart of the PIO state machine to allow it to be used again. dht22_init is not required to be called again, only <a class="el" href="dht22_8h.html#a77222a1c2b89ee80dd21e852350daee6" title="Starts the data collection.">dht22_start()</a> and <a class="el" href="dht22_8h.html#a026da520a997a509f597cf932836f322" title="Collect measured sensor data.">dht22_get_data_blocking()</a>. </p>
 
 </div>
 </div>

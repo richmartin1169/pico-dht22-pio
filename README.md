@@ -29,7 +29,9 @@ is a simple example of usage, and this folder contains its own CMakeLists.txt th
 built dht22 library.
 
 ## Design notes
+For an overview of how the dht22 library works see the generated doxygen information in html/ that describes the design in more detail.
+This documentation is generated from dht22/dht22.h
 File dht22/dht22.pio contains lots of comments about how the program works against the expected data stream
 from the dht22 sensor. In addition there's a section there that shows timing decisions made.
-Also see the generated doxygen information in html/ that describes usage in more detail.
+
 

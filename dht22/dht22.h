@@ -49,10 +49,11 @@
 *	A subsequent call to dht22_get_data_blocking() immediately tries to acquire the lock. If data collection hasn't finished yet (maybe because dht22_get_data_blocking()
 *	was called within a few mS of calling dht22_start()) then the lock will not be available, so execution blocks until it is available (which can only happen if
 *	the PIO has collected all 40 bits of data, raised an IRQ and the IRQ handler releases the lock, indicating data collection has finished.)\n
-*	If the CPU spends some time doing something else between calling dht22_start() and dht22_get_data_blocking() then the lock may be immediately available without any blocking.\n
+*	If in the parent program the CPU spends some time doing something else between calling dht22_start() and dht22_get_data_blocking() then the lock may be
+*	immediately available without any blocking.\n
 *	A potential failure mode exists; what if the sensor data pulses somehow get corrupted? If the PIO program does not receive all 40 bits of data then it will hang forever
 *	waiting for pulses or edges that will never appear.\n
-*	And when dht22_get_data_blocking() is called and it waits for the lock to become available it will never acquire the lock (the IRQ handler will never be called which releases the
+*	And then when dht22_get_data_blocking() is called and it waits for the lock to become available it will never acquire the lock (the IRQ handler will never be called which releases the
 *	semaphore lock).\n
 *	The software ensures that the wait for the lock in dht22_get_data_blocking() is time-limited to a #define value of 15mS. If the lock cannot be acquired within 15mS, there is an option available
 *	to reset and restart the PIO program, thereby setting the PIO state machine back to its starting state. Operations can be resumed, without a need to call dht22_init().
@@ -124,7 +125,7 @@ typedef enum dht22_raw {
 /**
 *	\brief Data structure used to hold both raw and converted data
 *
-*	When the data has been fully collected from the sensor, the raw data section of this strcuture is filled.
+*	When the data has been fully collected from the sensor, the raw data section of this structure is filled.
 *	When dht22_get_data_blocking() is called, the raw data is converted into the temperature and humidity values
 *	and the checksum calculated to test data validity
 */
@@ -132,7 +133,7 @@ typedef struct dht22data {
 	uint16_t raw_data[3]; ///<Raw data from the sensor. Use enum dht22_raw to decode.
 	uint8_t calculated_checksum; ///<Checksum calculated from the sensor raw data
 	dht22_status_t status; ///<Status of the data structure. See dht22_status_t
-	float temperature; ///<The temperature in degrees Celcius (decoded from the raw data when dht22_get_data_blocking() is called)
+	float temperature; ///<The temperature in degrees Celsius (decoded from the raw data when dht22_get_data_blocking() is called)
 	float humidity; ///<The relative humidity (decoded from the raw data when dht22_get_data_blocking() is called)
 } dht22data_t;
 
@@ -162,7 +163,7 @@ dht22_status_t dht22_start(dht22_start_ms_t start_pulse_width);
 
 
 /**
-*	\brief Collect measureed sensor data
+*	\brief Collect measured sensor data
 *
 *	Once dht22_start has been called, this function can be called immediately after or some time later.
 *	If the data collection has not yet finished, this function will block until it is finished, then return the data
@@ -177,7 +178,7 @@ dht22data_t dht22_get_data_blocking(bool reset_on_failure);
 /**
 *	\brief Resets and restarts the PIO state machine
 *
-*	Occasionally data from the sensor may be malformed, interrupted or lost. This can reult in a PIO program
+*	Occasionally data from the sensor may be malformed, interrupted or lost. This can result in a PIO program
 *	that is locked waiting for edges or pulses that will never arrive. This function allows a complete reset and restart
 *	of the PIO state machine to allow it to be used again. dht22_init is not required to be called again, only dht22_start() and dht22_get_data_blocking().
 */

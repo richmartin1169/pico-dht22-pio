@@ -89,7 +89,7 @@ Usage</h1>
 <li>Call <a class="el" href="dht22_8c.html#a14dc7a482177e1a2d939eb914988c5ee" title="Starts the data collection.">dht22_start()</a></li>
 </ol>
 <ol type="1">
-<li>Call <a class="el" href="dht22_8c.html#a026da520a997a509f597cf932836f322" title="Collect measureed sensor data.">dht22_get_data_blocking()</a></li>
+<li>Call <a class="el" href="dht22_8c.html#a026da520a997a509f597cf932836f322" title="Collect measured sensor data.">dht22_get_data_blocking()</a></li>
 </ol>
 <h1><a class="anchor" id="autotoc_md7"></a>
 Pico SDK Build</h1>
@@ -98,7 +98,10 @@ Standalone Program</h2>
 <p>Copy files <a class="el" href="dht22_8c.html">dht22.c</a>, <a class="el" href="dht22_8h.html">dht22.h</a> and dht22.pio into your project directory. Create your normal <b>CMakeLists.txt</b>, add <a class="el" href="dht22_8c.html">dht22.c</a> into the sources list. Also add <em>pico_generate_pio_header</em> (see dht22/CMakeLists.txt)</p>
 <h2><a class="anchor" id="autotoc_md9"></a>
 Using the dht22 code as a standalone separate library</h2>
-<p>As supplied, the folder structure places the <a class="el" href="dht22_8c.html">dht22.c</a>, <a class="el" href="dht22_8h.html">dht22.h</a> and dht22.pio inti a separate dht22 folder The CMakeLists.txt in tis directory builds this separate code as a standalone library, the parent folder is a simple example of usage, and this folder contains its own CMakeLists.txt that pulls in the separately built dht22 library. </p>
+<p>As supplied, the folder structure places the <a class="el" href="dht22_8c.html">dht22.c</a>, <a class="el" href="dht22_8h.html">dht22.h</a> and dht22.pio into a separate dht22 folder The CMakeLists.txt in this directory builds this separate code as a standalone library, the parent folder is a simple example of usage, and this folder contains its own CMakeLists.txt that pulls in the separately built dht22 library.</p>
+<h1><a class="anchor" id="autotoc_md10"></a>
+Design notes</h1>
+<p>For an overview of how the dht22 library works see the generated doxygen information in html/ that describes the design in more detail. This documentation is generated from <a class="el" href="dht22_8h.html">dht22/dht22.h</a> File dht22/dht22.pio contains lots of comments about how the program works against the expected data stream from the dht22 sensor. In addition there's a section there that shows timing decisions made. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->
