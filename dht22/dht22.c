@@ -90,6 +90,7 @@ dht22_status_t dht22_start(dht22_start_ms_t low_ms) {
 			if (debug) printf("START: Unlocked\n");
 			pio_sm_put_blocking(pio, sm, low_ms);
 			sem_acquire_blocking(&in_progress);
+			data.status=DATA_NONE;
 			return STARTED_OK;
 		} else {
 			if (debug) printf("START: Not able to start due to locking. Presume a start command has already been issued and a conversion is in progress?\n");
@@ -105,9 +106,10 @@ dht22data_t dht22_get_data_blocking(bool reset_on_failure) {
 	float negativeTemp;
 	if (debug) printf("getDataBlocking: Waiting for lock to become available\n");
 	if (sem_acquire_timeout_ms(&in_progress, DHT22_TIMEOUT)) {
-		
+		// We have lock, therefore the IRQ was fired successfully.
 		if (debug) printf("getDataBlocking: Lock acquired successfully\n");
 		if (data.status == DATA_RAW) {
+			// IRQ handler has found 3 values and placed them in the data structure.
 			raw_rh_hi=(data.raw_data[HUMIDITY]&(0xff<<8))>>8;
 			raw_rh_low=data.raw_data[HUMIDITY]&0xff;
 			raw_temp_hi=(data.raw_data[TEMP]&(0xff<<8))>>8;
@@ -118,7 +120,10 @@ dht22data_t dht22_get_data_blocking(bool reset_on_failure) {
 			calcd_cs=raw_rh_hi+raw_rh_low+raw_temp_hi+raw_temp_low;
 			data.calculated_checksum=calcd_cs;
 			if (calcd_cs==data.raw_data[CHECKSUM]) {
+				// Sensor data checksum is valid.
 				if (raw_temp_hi>0x7f)
+					// bit 15 is used as a sign of +/- temperature.
+					// Rest of data is as standard, i.e. not two's complement like normal C storage of a negative int.
 					negativeTemp=-1.0f;
 				else
 					negativeTemp=1.0f;
@@ -131,8 +136,10 @@ dht22data_t dht22_get_data_blocking(bool reset_on_failure) {
 				if (debug) printf("getDataBlocking: Data checksum has FAILED\n");
 			}
 			
-		} else
+		} else {
 			if (debug) printf("getDataBlocking: data structure does not have DATA_RAW status\n");
+			data.status=DATA_NONE;
+		}
 			
 	} else {
 		if (debug) printf("getDataBlocking: Lock could not be acquired, timed out.\n");

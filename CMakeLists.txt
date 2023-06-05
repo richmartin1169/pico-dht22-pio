@@ -35,3 +35,4 @@ pico_enable_stdio_uart(test 0)
 # create map/bin/hex file etc.
 pico_add_extra_outputs(test)
 
+install(FILES ${CMAKE_BINARY_DIR}/test.uf2 DESTINATION ${CMAKE_SOURCE_DIR})

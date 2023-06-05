@@ -1,23 +1,2 @@
+build/
 
-CMakeCache.txt
-CMakeDoxyfile.in
-CMakeDoxygenDefaults.cmake
-CMakeFiles/
-Doxyfile
-Makefile
-cmake_install.cmake
-dht22/CMakeFiles
-dht22/dht22.pio.h
-dht22/Makefile
-dht22/make_install.cmake
-dht22/libdht22.a
-dht22/pico-sdk
-elf2uf2/
-generated/
-pico-sdk/
-pioasm/
-test.bin
-test.dis
-test.elf
-test.elf.map
-test.hex

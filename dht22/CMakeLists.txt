@@ -9,7 +9,7 @@ pico_sdk_init()
 
 add_library(dht22 STATIC dht22.c)
 
-pico_generate_pio_header(dht22 dht22.pio)
+pico_generate_pio_header(dht22 ${CMAKE_CURRENT_SOURCE_DIR}/dht22.pio)
 
 target_link_libraries(dht22 pico_stdlib hardware_pio)
 

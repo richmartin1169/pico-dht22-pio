@@ -17,9 +17,12 @@ Add pullup of 10K between the sensor data pin and 3v3.
 
 ## Usage
 Call the functions in this order:
-1. Call dht22_init()
+1. Call dht22_init() [Only required once]
 1. Call dht22_start()
 1. Call dht22_get_data_blocking()
+1. Call dht22_start()
+1. Call dht22_get_data_blocking()
+1. ...etc
 
 ## Example program using the library
 The example program (main.c) defines the sensor pin as GPIO26 and loops round measuring the temperature and humidity every 2.5 seconds.
@@ -33,8 +36,13 @@ To build the uf2 file yourself:
 
 Clone this repo, cd into your copy. Add pico C sdk folder location to path.
 
-    cmake .
-    make
+    mkdir build
+    cd build
+    cmake ..
+    make install
+    
+The `make install` step ensures that on a successful build, the resulting test.uf2 Pico firmware file is copied from the build tree to the root
+of the source tree.
 
 ## Pico SDK Build
 ### Standalone Program
@@ -43,16 +51,16 @@ Create your normal **CMakeLists.txt**, add dht22.c into the sources list.
 Also add *pico_generate_pio_header* (see dht22/CMakeLists.txt)
 
 ### Using the dht22 code as a standalone separate library
-As supplied, the folder structure places the dht22.c, dht22.h and dht22.pio into a separate dht22 folder
+As supplied, the folder structure places the dht22.c, dht22.h and dht22.pio into a separate dht22 folder.
 The CMakeLists.txt in this directory builds this separate code as a standalone library, the parent folder
 is a simple example of usage, and this folder contains its own CMakeLists.txt that pulls in the separately
-built dht22 library.
+built dht22 library and builds everything outside the source tree.
 
 ## Design notes
-For an overview of how the dht22 library works see the generated doxygen information in html/ that describes the design in more detail.
-This documentation is generated from dht22/dht22.h
+For an overview of how the dht22 library works see file dht22/dht22.h, it describes the design in some detail.
+The generated doxygen information in html/ is mostly generated from dht22/dht22.h
 
 File dht22/dht22.pio also contains lots of comments about how the program works against the expected data stream
-from the dht22 sensor. In addition there's a section there that shows timing decisions made.
+from the dht22 sensor. In addition there's a section there that details how certain timing decisions were made.
 
 
